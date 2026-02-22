@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Registrierung</h2>
+  <form method="post" action="{{ url_for('registrieren') }}">
+    <label>Name</label>
+    <input name="name" placeholder="z.B. Baha" required />
+    <button class="btn" type="submit">Speichern</button>
+  </form>
+{% endblock %}

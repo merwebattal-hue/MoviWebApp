@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoviWeb</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <nav class="nav">
+    <a href="{{ url_for('startseite') }}">Start</a>
+    <a href="{{ url_for('filme_liste') }}">Meine Filme</a>
+    {% if session.get("benutzername") %}
+      <span class="nav-user">User: {{ session.get("benutzername") }}</span>
+      <a href="{{ url_for('abmelden') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('registrieren_form') }}">Register</a>
+    {% endif %}
+  </nav>
+
+  <main class="container">
+    {% with nachrichten = get_flashed_messages(with_categories=true) %}
+      {% if nachrichten %}
+        <div class="messages">
+          {% for kategorie, text in nachrichten %}
+            <div class="msg {{ kategorie }}">{{ text }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
