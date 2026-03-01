@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+  <h2>Benutzer auswählen</h2>
+
+  <form method="post" action="{{ url_for('benutzer_erstellen') }}" class="row">
+    <input name="name" placeholder="Neuen Benutzer anlegen (z.B. Merve)" required />
+    <button class="btn" type="submit">Erstellen</button>
+  </form>
+
+  <div class="grid">
+    {% for b in benutzer %}
+      <div class="card">
+        <h3>{{ b.name }}</h3>
+        <a class="btn" href="{{ url_for('filme_liste', benutzer_id=b.id) }}">Auswählen</a>
+      </div>
+    {% else %}
+      <p>Noch keine Benutzer. Leg einen an.</p>
+    {% endfor %}
+  </div>
+{% endblock %}

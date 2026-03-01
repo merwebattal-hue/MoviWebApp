@@ -1,8 +1,12 @@
 {% extends "base.html" %}
-{% block content %}
-  <h2>Filmliste von {{ benutzer.name }}</h2>
 
-  <form method="post" action="{{ url_for('film_hinzufuegen') }}" class="row">
+{% block content %}
+
+  <a href="{{ url_for('startseite') }}">&larr; Back to Users</a>
+
+  <h2>Movies for {{ benutzer.name }}</h2>
+
+  <form method="post" action="{{ url_for('film_hinzufuegen', benutzer_id=benutzer.id) }}" class="row">
     <input name="titel" placeholder="Filmtitel eingeben (z.B. Inception)" required />
     <button class="btn" type="submit">Hinzufügen</button>
   </form>
@@ -10,23 +14,34 @@
   <div class="grid">
     {% for film in filme %}
       <div class="card">
+
         <div class="card-head">
           <h3>{{ film.titel }}</h3>
           <small>{{ film.jahr or "" }}</small>
         </div>
 
+        <p><strong>Director:</strong> {{ film.director or "Unbekannt" }}</p>
+
         {% if film.poster_url and film.poster_url != "N/A" %}
           <img src="{{ film.poster_url }}" alt="Poster" class="poster">
         {% endif %}
 
-        <div class="card-actions">
-          <form method="post" action="{{ url_for('film_loeschen', film_id=film.id) }}">
-            <button class="btn danger" type="submit">Löschen</button>
-          </form>
-        </div>
+        <form method="post"
+              action="{{ url_for('film_aktualisieren', benutzer_id=benutzer.id, film_id=film.id) }}"
+              class="row">
+          <input name="neuer_titel" value="{{ film.titel }}" />
+          <button class="btn" type="submit">Update</button>
+        </form>
+
+        <form method="post"
+              action="{{ url_for('film_loeschen', benutzer_id=benutzer.id, film_id=film.id) }}">
+          <button class="btn danger" type="submit">Delete</button>
+        </form>
+
       </div>
     {% else %}
-      <p>Noch keine Filme. Zeit für ein bisschen Kino-ROI.</p>
+      <p>Noch keine Filme.</p>
     {% endfor %}
   </div>
+
 {% endblock %}

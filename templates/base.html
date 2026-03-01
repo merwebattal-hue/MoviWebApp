@@ -4,19 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MoviWeb</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <nav class="nav">
-    <a href="{{ url_for('startseite') }}">Start</a>
-    <a href="{{ url_for('filme_liste') }}">Meine Filme</a>
-    {% if session.get("benutzername") %}
-      <span class="nav-user">User: {{ session.get("benutzername") }}</span>
-      <a href="{{ url_for('abmelden') }}">Logout</a>
-    {% else %}
-      <a href="{{ url_for('registrieren_form') }}">Register</a>
-    {% endif %}
-  </nav>
+  <header class="header">
+    <nav class="nav">
+      <a href="{{ url_for('startseite') }}">MoviWeb 🎬</a>
+
+      <span class="nav-user">
+        {% if benutzer %}{{ benutzer.name }}{% endif %}
+      </span>
+    </nav>
+  </header>
 
   <main class="container">
     {% with nachrichten = get_flashed_messages(with_categories=true) %}
