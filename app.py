@@ -4,6 +4,8 @@ from models import db
 from omdb_client import OmdbClient
 from data_manager import DataManager
 import logging
+import json
+import os
 
 
 def app_erstellen() -> Flask:
@@ -22,12 +24,38 @@ def app_erstellen() -> Flask:
         db.create_all()
 
     # =========================
-    # INDEX (USERS LIST + CREATE FORM)
+    # BLOG JSON HELPERS
+    # =========================
+    DATA_FILE = os.path.join(os.path.dirname(__file__), "blog_posts.json")
+
+    def lade_blog_posts():
+        """
+        Liest alle Blogposts aus der JSON-Datei und gibt sie als Liste zurück.
+        Falls die Datei nicht existiert oder ungültig ist, wird eine leere Liste zurückgegeben.
+        """
+        if not os.path.exists(DATA_FILE):
+            return []
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return []
+
+    # =========================
+    # HOME (BLOG INDEX)
     # =========================
     @app.get("/")
-    def startseite():
+    def index():
+        posts = lade_blog_posts()
+        return render_template("index.html", posts=posts)
+
+    # =========================
+    # USERS HOME (LIST + CREATE FORM)  -> moved from "/"
+    # =========================
+    @app.get("/users")
+    def users_home():
         benutzer = repo.get_users()
-        return render_template("index.html", benutzer=benutzer)
+        return render_template("users_index.html", benutzer=benutzer)
 
     # =========================
     # USERS (CREATE)
@@ -37,7 +65,7 @@ def app_erstellen() -> Flask:
         name = request.form.get("name", "").strip()
         if not name:
             flash("Bitte einen Namen eingeben.", "error")
-            return redirect(url_for("startseite"))
+            return redirect(url_for("users_home"))
 
         neuer = repo.create_user(name)
         return redirect(url_for("filme_liste", benutzer_id=neuer.id))
@@ -50,7 +78,7 @@ def app_erstellen() -> Flask:
         benutzer = repo.get_user(benutzer_id)
         if not benutzer:
             flash("Benutzer nicht gefunden.", "error")
-            return redirect(url_for("startseite"))
+            return redirect(url_for("users_home"))
 
         filme = repo.get_movies(benutzer_id)
         return render_template("movies.html", benutzer=benutzer, filme=filme)

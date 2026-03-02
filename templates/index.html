@@ -1,23 +1,21 @@
-{% extends "base.html" %}
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Blog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Blog Posts</h1>
 
-{% block content %}
-  <h1>Nutzer</h1>
+  {% for post in posts %}
+    <article>
+      <h2>{{ post.title }}</h2>
+      <p><strong>Autor:</strong> {{ post.author }}</p>
+      <p>{{ post.content }}</p>
+      <hr>
+    </article>
+  {% endfor %}
 
-  <ul>
-    {% for user in benutzer %}
-      <li>
-        <a href="{{ url_for('filme_liste', benutzer_id=user.id) }}">{{ user.name }}</a>
-      </li>
-    {% else %}
-      <li>Noch keine Nutzer vorhanden.</li>
-    {% endfor %}
-  </ul>
-
-  <h2>Neuen Nutzer hinzufügen</h2>
-
-  <form method="post" action="{{ url_for('benutzer_erstellen') }}" class="row">
-    <input name="name" placeholder="Name" required />
-    <button class="btn" type="submit">Nutzer hinzufügen</button>
-  </form>
-{% endblock %}
-
+</body>
+</html>
