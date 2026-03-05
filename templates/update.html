@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Blogpost bearbeiten</h1>
+
+  <form method="post" action="{{ url_for('update', post_id=post.id) }}" class="row">
+    <input name="author" placeholder="Autor" value="{{ post.author }}" required>
+    <input name="title" placeholder="Titel" value="{{ post.title }}" required>
+    <textarea name="content" placeholder="Inhalt" rows="6" required>{{ post.content }}</textarea>
+
+    <button class="btn" type="submit">Speichern</button>
+    <a class="btn" href="{{ url_for('index') }}">Abbrechen</a>
+  </form>
+{% endblock %}

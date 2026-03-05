@@ -1,21 +1,30 @@
-<!doctype html>
-<html lang="de">
-<head>
-  <meta charset="utf-8">
-  <title>Blog</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
   <h1>Blog Posts</h1>
+
+  <a class="btn" href="{{ url_for('add') }}">+ Neuen Beitrag hinzufügen</a>
+  <hr>
 
   {% for post in posts %}
     <article>
       <h2>{{ post.title }}</h2>
+
+      <div class="row" style="gap: 8px; margin: 8px 0;">
+        <a class="btn" href="{{ url_for('update', post_id=post.id) }}">Bearbeiten</a>
+
+        <a class="btn"
+           href="{{ url_for('delete', post_id=post.id) }}"
+           onclick="return confirm('Diesen Blogpost wirklich löschen?');">
+          Löschen
+        </a>
+      </div>
+
       <p><strong>Autor:</strong> {{ post.author }}</p>
       <p>{{ post.content }}</p>
       <hr>
     </article>
+  {% else %}
+    <p>Noch keine Blogposts vorhanden.</p>
   {% endfor %}
-
-</body>
-</html>
+{% endblock %}

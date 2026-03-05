@@ -41,6 +41,21 @@ def app_erstellen() -> Flask:
         except (json.JSONDecodeError, OSError):
             return []
 
+    def speichere_blog_posts(posts):
+        """
+        Schreibt alle Blogposts zurück in die JSON-Datei.
+        """
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(posts, f, ensure_ascii=False, indent=2)
+
+    def naechste_id(posts):
+        """
+        Erzeugt eine neue eindeutige ID (max_id + 1).
+        """
+        if not posts:
+            return 1
+        return max(p.get("id", 0) for p in posts) + 1
+
     # =========================
     # HOME (BLOG INDEX)
     # =========================
@@ -50,7 +65,87 @@ def app_erstellen() -> Flask:
         return render_template("index.html", posts=posts)
 
     # =========================
-    # USERS HOME (LIST + CREATE FORM)  -> moved from "/"
+    # ADD (BLOG POST)
+    # =========================
+    @app.route("/add", methods=["GET", "POST"])
+    def add():
+        if request.method == "POST":
+            author = request.form.get("author", "").strip()
+            title = request.form.get("title", "").strip()
+            content = request.form.get("content", "").strip()
+
+            if not author or not title or not content:
+                flash("Bitte alle Felder ausfüllen (Autor, Titel, Inhalt).", "error")
+                return render_template("add.html", author=author, title=title, content=content)
+
+            posts = lade_blog_posts()
+            new_post = {
+                "id": naechste_id(posts),
+                "author": author,
+                "title": title,
+                "content": content,
+            }
+            posts.append(new_post)
+            speichere_blog_posts(posts)
+
+            flash("Blogpost wurde hinzugefügt.", "success")
+            return redirect(url_for("index"))
+
+        return render_template("add.html")
+
+    # =========================
+    # UPDATE (BLOG POST)
+    # =========================
+    @app.route("/update/<int:post_id>", methods=["GET", "POST"])
+    def update(post_id: int):
+        posts = lade_blog_posts()
+        post = next((p for p in posts if p.get("id") == post_id), None)
+
+        if post is None:
+            flash("Blogpost nicht gefunden.", "error")
+            return redirect(url_for("index"))
+
+        if request.method == "POST":
+            author = request.form.get("author", "").strip()
+            title = request.form.get("title", "").strip()
+            content = request.form.get("content", "").strip()
+
+            if not author or not title or not content:
+                flash("Bitte alle Felder ausfüllen (Autor, Titel, Inhalt).", "error")
+                post_form = {"id": post_id, "author": author, "title": title, "content": content}
+                return render_template("update.html", post=post_form)
+
+            for p in posts:
+                if p.get("id") == post_id:
+                    p["author"] = author
+                    p["title"] = title
+                    p["content"] = content
+                    break
+
+            speichere_blog_posts(posts)
+            flash("Blogpost wurde aktualisiert.", "success")
+            return redirect(url_for("index"))
+
+        return render_template("update.html", post=post)
+
+    # =========================
+    # DELETE (BLOG POST)
+    # =========================
+    @app.route("/delete/<int:post_id>")
+    def delete(post_id: int):
+        posts = lade_blog_posts()
+        neue_posts = [p for p in posts if p.get("id") != post_id]
+
+        if len(neue_posts) == len(posts):
+            flash("Blogpost nicht gefunden.", "error")
+            return redirect(url_for("index"))
+
+        speichere_blog_posts(neue_posts)
+        flash("Blogpost wurde gelöscht.", "success")
+        return redirect(url_for("index"))
+
+    # =========================
+    # USERS HOME (LIST + CREATE FORM)
     # =========================
     @app.get("/users")
     def users_home():
