@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Neuen Blogpost hinzufügen</h1>
+
+  <form method="post" action="{{ url_for('add') }}" class="row">
+    <input name="author" placeholder="Autor" required>
+    <input name="title" placeholder="Titel" required>
+    <textarea name="content" placeholder="Inhalt" rows="6" required></textarea>
+
+    <button class="btn" type="submit">Speichern</button>
+    <a class="btn" href="{{ url_for('index') }}">Abbrechen</a>
+  </form>
+{% endblock %}
