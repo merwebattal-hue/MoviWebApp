@@ -37,7 +37,14 @@ def app_erstellen() -> Flask:
             return []
         try:
             with open(DATA_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                posts = json.load(f)
+
+                # Falls ältere Posts noch kein likes-Feld haben
+                for post in posts:
+                    if "likes" not in post:
+                        post["likes"] = 0
+
+                return posts
         except (json.JSONDecodeError, OSError):
             return []
 
@@ -84,6 +91,7 @@ def app_erstellen() -> Flask:
                 "author": author,
                 "title": title,
                 "content": content,
+                "likes": 0,
             }
             posts.append(new_post)
             speichere_blog_posts(posts)
@@ -112,7 +120,13 @@ def app_erstellen() -> Flask:
 
             if not author or not title or not content:
                 flash("Bitte alle Felder ausfüllen (Autor, Titel, Inhalt).", "error")
-                post_form = {"id": post_id, "author": author, "title": title, "content": content}
+                post_form = {
+                    "id": post_id,
+                    "author": author,
+                    "title": title,
+                    "content": content,
+                    "likes": post.get("likes", 0),
+                }
                 return render_template("update.html", post=post_form)
 
             for p in posts:
@@ -142,6 +156,28 @@ def app_erstellen() -> Flask:
 
         speichere_blog_posts(neue_posts)
         flash("Blogpost wurde gelöscht.", "success")
+        return redirect(url_for("index"))
+
+    # =========================
+    # LIKE (BLOG POST)
+    # =========================
+    @app.route("/like/<int:post_id>")
+    def like(post_id: int):
+        posts = lade_blog_posts()
+
+        gefunden = False
+        for p in posts:
+            if p.get("id") == post_id:
+                p["likes"] = p.get("likes", 0) + 1
+                gefunden = True
+                break
+
+        if not gefunden:
+            flash("Blogpost nicht gefunden.", "error")
+            return redirect(url_for("index"))
+
+        speichere_blog_posts(posts)
+        flash("Blogpost wurde geliked.", "success")
         return redirect(url_for("index"))
 
     # =========================
